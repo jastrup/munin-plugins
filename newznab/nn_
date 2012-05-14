@@ -137,7 +137,6 @@ $graphs{category} = {
 		},
 	},
 	data_sources => [
-		{name => '1000', label => 'Console'},
 		{name => '1010', label => 'NDS'},
 		{name => '1020', label => 'PSP'},
 		{name => '1030', label => 'Wii'},
@@ -146,7 +145,6 @@ $graphs{category} = {
 		{name => '1060', label => 'WiiWare/VC'},
 		{name => '1070', label => 'XBOX 360 DLC'},
 		{name => '1080', label => 'PS3'},
-		{name => '2000', label => 'Movies'},
 		{name => '2010', label => 'Foreign'},
 		{name => '2020', label => 'Other'},
 		{name => '2030', label => 'SD'},
@@ -158,7 +156,6 @@ $graphs{category} = {
 		{name => '3020', label => 'Video'},
 		{name => '3030', label => 'Audiobook'},
 		{name => '3040', label => 'Lossless'},
-		{name => '4000', label => 'PC'},
 		{name => '4010', label => '0day'},
 		{name => '4020', label => 'ISO'},
 		{name => '4030', label => 'Mac'},
@@ -166,7 +163,6 @@ $graphs{category} = {
 		{name => '4050', label => 'Games'},
 		{name => '4060', label => 'Mobile-iOS'},
 		{name => '4070', label => 'Mobile-Android'},
-		{name => '5000', label => 'TV'},
 		{name => '5020', label => 'Foreign'},
 		{name => '5030', label => 'SD'},
 		{name => '5040', label => 'HD'},
@@ -174,14 +170,12 @@ $graphs{category} = {
 		{name => '5060', label => 'Sport'},
 		{name => '5070', label => 'Anime'},
 		{name => '5080', label => 'Documentary'},
-		{name => '6000', label => 'XXX'},
 		{name => '6010', label => 'DVD'},
 		{name => '6020', label => 'WMV'},
 		{name => '6030', label => 'XviD'},
 		{name => '6040', label => 'x264'},
 		{name => '6050', label => 'Pack'},
 		{name => '6060', label => 'ImgSet'},
-		{name => '7000', label => 'Other'},
 		{name => '7010', label => 'Misc'},
 		{name => '7020', label => 'Ebook'},
 		{name => '7030', label => 'Comics'},	
@@ -341,7 +335,18 @@ sub update_logins {
 
 sub update_category {
 	my ($dbh) = @_;
-	my $sth = $dbh->prepare('select count(*) as releases, category.title, category.id from releases LEFT JOIN category ON releases.categoryID = category.ID group by releases.categoryID');
+	my $sth = $dbh->prepare('
+        SELECT count(*) AS 
+            releases, 
+            category.title, 
+            category.id 
+        FROM releases 
+        LEFT JOIN 
+            category ON releases.categoryID = category.ID 
+        WHERE 
+            updatedate > now() - INTERVAL 5 MINUTE 
+        GROUP BY releases.categoryID');
+
 	$sth->execute();
 	if ($@) { die $@; }
 	while (my $row = $sth->fetch) {
@@ -352,7 +357,7 @@ sub update_category {
 
 sub update_releases {
 	my ($dbh) = @_;
-	my $sth = $dbh->prepare('SELECT count(*) as releases from releases');
+	my $sth = $dbh->prepare('SELECT count(*) as releases from releases where updatedate > now() - INTERVAL 5 MINUTE');
 	eval {
 		$sth->execute();
 	};
