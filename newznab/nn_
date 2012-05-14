@@ -92,6 +92,23 @@ my %defaults = (
 
 my %graphs = ();
 
+$graphs{logins} = {
+    config => {
+        global_attrs => {
+            title   =>  'Active Users',
+            vtitle  =>  'Active Users',
+        },
+        data_source_attrs   => {
+            min     => '0',
+            draw    => 'LINE2',
+            type    => 'GAUGE',
+         },
+    },
+    data_sources => [
+        {name => 'logins', label => 'Active users'}
+    ],
+}
+
 $graphs{releases} = {
 	config => {
 		global_attrs => {
@@ -289,6 +306,7 @@ sub run_queries {
 		'users'				=> \&update_users,
 		'api'				=> \&update_requests,
 		'category'			=> \&update_category,
+        'logins'            => \&update_logins,
 	);
 	die "Unknown updater: $updater" unless exists $updaters{$updater};
 	$updaters{$updater}->($dbh);
@@ -310,7 +328,17 @@ sub update_requests {
 		$sth->finish();                                                                                 
 	}       
 }
-      
+
+sub uptate_logins {
+    my ($dbh) = @_;
+    my $sth = $dbh->prepare('select count(*) as logins from users where lastlogin > now() - INTERVAL 5 MINUTE');
+    $sth->execute();
+    if ($@) { die $@; }
+    my $row = $sth->fetchrow_hashref();
+    $data->{logins} = $row->{'logins'};
+    $sth->finish();
+}
+
 sub update_category {
 	my ($dbh) = @_;
 	my $sth = $dbh->prepare('select count(*) as releases, category.title, category.id from releases LEFT JOIN category ON releases.categoryID = category.ID group by releases.categoryID');
@@ -321,6 +349,7 @@ sub update_category {
 	}
 	
 }
+
 sub update_releases {
 	my ($dbh) = @_;
 	my $sth = $dbh->prepare('SELECT count(*) as releases from releases');
