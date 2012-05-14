@@ -329,7 +329,7 @@ sub update_requests {
 	}       
 }
 
-sub uptate_logins {
+sub update_logins {
     my ($dbh) = @_;
     my $sth = $dbh->prepare('select count(*) as logins from users where lastlogin > now() - INTERVAL 5 MINUTE');
     $sth->execute();
