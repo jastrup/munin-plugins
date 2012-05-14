@@ -154,13 +154,14 @@ $graphs{api} = {
 			vlabel	=> 'API / DOWNLOAD',
 		},
 		data_source_attrs => {
-			min   => '0',
+			min   	=> '0',
 			draw	=> 'LINE1',
+			type	=> 'GAUGE',
 		},
 	},
 	data_sources => [
-		{name => 'request',		label => 'API Requests', type => 'DERIVE'},
-		{name => 'download',		label => 'Downloads', type => 'DERIVE'},
+		{name => 'request',		label => 'API Requests'},
+		{name => 'download',		label => 'Downloads'},
 	],
 };
 
