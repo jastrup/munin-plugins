@@ -107,7 +107,7 @@ $graphs{logins} = {
     data_sources => [
         {name => 'logins', label => 'Active users'}
     ],
-}
+};
 
 $graphs{releases} = {
 	config => {
